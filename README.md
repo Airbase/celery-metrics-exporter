@@ -1,4 +1,4 @@
-# CeleryMetricsExporter
+# celery-metrics-exporter
 
 ## Components
 
