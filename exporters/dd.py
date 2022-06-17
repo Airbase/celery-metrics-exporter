@@ -67,7 +67,7 @@ class DataDogExporter(Thread):
         }
 
     def run(self) -> None:
-        logger.info(f"Starting Datadog exporter")
+        logger.info("Starting Datadog exporter")
         while True:
             try:
                 if self.store.is_empty():

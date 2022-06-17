@@ -1,8 +1,6 @@
 import logging
-from queue import Queue
 
 import click
-from kombu.utils.functional import LRUCache
 
 from exporters import DataDogExporter
 from receiver import CeleryEventReceiver
@@ -15,7 +13,7 @@ def run(broker):
     logging.basicConfig(format="[%(levelname)s] %(message)s")
 
     logging.info("Initialize store")
-    store = InMemoryStore(LRUCache(100000), Queue())
+    store = InMemoryStore(max_size=100000)
 
     logging.info("Initialize receiver")
     event_receiver = CeleryEventReceiver(broker=broker, store=store)

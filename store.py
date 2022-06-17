@@ -1,6 +1,9 @@
 import logging
 from abc import ABC, abstractmethod
+from queue import Queue
 from threading import Lock
+
+from kombu.utils.functional import LRUCache
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -42,9 +45,9 @@ class TaskStore(ABC):
 
 
 class InMemoryStore(TaskStore):
-    def __init__(self, event_store=None, processing_queue=None):
-        self.event_store = event_store
-        self.processing_queue = processing_queue
+    def __init__(self, max_size):
+        self.event_store = LRUCache(max_size)
+        self.processing_queue = Queue()
         self.mutex = Lock()
 
     def is_empty(self):
