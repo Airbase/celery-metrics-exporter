@@ -2,6 +2,7 @@
 *.egg-info
 *.pyc
 .python-version
+build
 
 # Notebooks
 *.ipynb
