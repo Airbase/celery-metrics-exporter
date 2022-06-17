@@ -1,4 +1,5 @@
 import logging
+import os
 
 import click
 
@@ -10,7 +11,9 @@ from store import InMemoryStore
 @click.command()
 @click.option("--broker", default="redis://localhost:6379/1", help="celery broker uri")
 def run(broker):
-    logging.basicConfig(format="[%(levelname)s] %(message)s")
+    logging.basicConfig(
+        format="[%(levelname)s] %(message)s", level=os.environ.get("LOG_LEVEL")
+    )
 
     logging.info("Initialize store")
     store = InMemoryStore(max_size=100000)

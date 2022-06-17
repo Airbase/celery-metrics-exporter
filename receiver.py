@@ -9,7 +9,6 @@ from store import TaskStore
 from utils import is_event_type_task
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
 
 class CeleryEventReceiver(Thread):
@@ -35,7 +34,7 @@ class CeleryEventReceiver(Thread):
         )
         self.store.add_event(event.uuid, event.state, event)
         if event.state in READY_STATES:
-            logger.info(f"task: {event.uuid} ended with state: {event.state}")
+            logger.debug(f"task: {event.uuid} ended with state: {event.state}")
             self.store.add_processable_task(event.uuid)
 
     def run(self) -> None:

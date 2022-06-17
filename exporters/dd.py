@@ -7,7 +7,6 @@ from celery.states import FAILURE, PENDING, STARTED, SUCCESS
 from datadog import initialize, statsd
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
 
 class DataDogMetrics(Enum):
