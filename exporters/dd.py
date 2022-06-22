@@ -60,10 +60,11 @@ class DataDogExporter(Thread):
     @staticmethod
     def get_tags(events):
         pending_event = events[PENDING]
-        return {
+        tags_dict = {
             "queue": pending_event.get("queue", ""),
             "task_name": pending_event.get("name", ""),
         }
+        return [f"{key}:{value}" for key, value in tags_dict.items()]
 
     def run(self) -> None:
         logger.info("Starting Datadog exporter")
@@ -77,10 +78,10 @@ class DataDogExporter(Thread):
                 tags = self.get_tags(events)
                 summary = DataDogSummary(events)
                 statsd.histogram(
-                    DataDogMetrics.TASK_WAIT_TIME, summary.wait_time, tags=tags
+                    DataDogMetrics.TASK_WAIT_TIME.value, summary.wait_time, tags=tags
                 )
                 statsd.histogram(
-                    DataDogMetrics.TASK_RUNTIME_TIME, summary.run_time, tags=tags
+                    DataDogMetrics.TASK_RUNTIME_TIME.value, summary.run_time, tags=tags
                 )
                 if SUCCESS in events:
                     statsd.increment(DataDogMetrics.TOTAL_SUCCESS, tags=tags)
