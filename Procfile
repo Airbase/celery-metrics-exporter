@@ -1,1 +1,1 @@
-python cli.py --broker=$REDIS_BROKER
+exporter: python cli.py --broker=$REDIS_BROKER
