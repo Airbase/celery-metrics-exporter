@@ -59,12 +59,15 @@ class DataDogExporter(Thread):
 
     @staticmethod
     def get_tags(events):
-        pending_event = events[PENDING]
-        tags_dict = {
-            "queue": pending_event.get("queue", ""),
-            "task_name": pending_event.get("name", ""),
-        }
-        return [f"{key}:{value}" for key, value in tags_dict.items()]
+        try:
+            pending_event = events[PENDING]
+            tags_dict = {
+                "queue": pending_event.get("queue", ""),
+                "task_name": pending_event.get("name", ""),
+            }
+            return [f"{key}:{value}" for key, value in tags_dict.items() if value]
+        except KeyError:
+            logger.exception(f"Pending Event missing in {events}")
 
     def run(self) -> None:
         logger.info("Starting Datadog exporter")
