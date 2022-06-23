@@ -24,7 +24,7 @@ def run(broker):
 
     # start all the exporters in different threads
     logging.info("Initialize datadog exporter")
-    dd_exporter = DataDogExporter("api_key", store=store)
+    dd_exporter = DataDogExporter(store=store)
     dd_exporter.start()
 
     # data flow: event_receiver -> store -> dd_exporter

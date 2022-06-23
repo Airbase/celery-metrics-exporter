@@ -50,11 +50,10 @@ class DataDogSummary:  # maybe this can be generic
 
 
 class DataDogExporter(Thread):
-    def __init__(self, api_key, config_option=None, store=None):
+    def __init__(self, config_option=None, store=None):
         Thread.__init__(self)
         self.daemon = True
         self.store = store
-        self.api_key = api_key
         self.config_option = config_option or {
             "statsd_host": "127.0.0.1",
             "statsd_port": 8125,
