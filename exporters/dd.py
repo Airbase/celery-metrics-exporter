@@ -27,9 +27,13 @@ class DataDogSummary:  # maybe this can be generic
 
         :return: int
         """
-        client_sent_time = self.events[PENDING]["timestamp"]
-        start_time = self.events[STARTED]["timestamp"]
-        return start_time - client_sent_time
+        try:
+            client_sent_time = self.events[PENDING]["timestamp"]
+            start_time = self.events[STARTED]["timestamp"]
+            return start_time - client_sent_time
+        except KeyError:
+            logger.exception(f"KeyError for {self.events}")
+            return None
 
     @property
     def run_time(self):
@@ -42,7 +46,7 @@ class DataDogSummary:  # maybe this can be generic
             return self.events[SUCCESS]["runtime"]
         except KeyError:
             logger.exception(f"KeyError for {self.events}")
-            return 0
+            return None
 
 
 class DataDogExporter(Thread):
@@ -80,23 +84,19 @@ class DataDogExporter(Thread):
                 events = self.store.get_events(task_id)
                 tags = self.get_tags(events)
                 summary = DataDogSummary(events)
-                statsd.histogram(
-                    DataDogMetrics.TASK_WAIT_TIME.value, summary.wait_time, tags=tags
-                )
-                statsd.histogram(
-                    DataDogMetrics.TASK_RUNTIME_TIME.value, summary.run_time, tags=tags
-                )
+                if wait_time := summary.wait_time is not None:
+                    statsd.histogram(
+                        DataDogMetrics.TASK_WAIT_TIME.value, wait_time, tags=tags
+                    )
+                if run_time := summary.run_time is not None:
+                    statsd.histogram(
+                        DataDogMetrics.TASK_RUNTIME_TIME.value, run_time, tags=tags
+                    )
                 if SUCCESS in events:
-                    statsd.increment(DataDogMetrics.TOTAL_SUCCESS, tags=tags)
+                    statsd.increment(DataDogMetrics.TOTAL_SUCCESS.value, tags=tags)
                 if FAILURE in events:
-                    statsd.increment(DataDogMetrics.TOTAL_FAILED, tags=tags)
+                    statsd.increment(DataDogMetrics.TOTAL_FAILED.value, tags=tags)
                 self.store.pop_task(task_id)
-                print(
-                    f"{DataDogMetrics.TASK_WAIT_TIME.value}, {summary.wait_time}, {tags}"
-                )
-                print(
-                    f"{DataDogMetrics.TASK_RUNTIME_TIME.value}, {summary.run_time}, {tags}"
-                )
             except Exception as ex:
                 logger.exception(f"datadog exporter exception {ex}")
                 sleep(10)
