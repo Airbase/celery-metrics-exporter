@@ -84,11 +84,11 @@ class DataDogExporter(Thread):
                 events = self.store.get_events(task_id)
                 tags = self.get_tags(events)
                 summary = DataDogSummary(events)
-                if wait_time := summary.wait_time is not None:
+                if (wait_time := summary.wait_time) is not None:
                     statsd.histogram(
                         DataDogMetrics.TASK_WAIT_TIME.value, wait_time, tags=tags
                     )
-                if run_time := summary.run_time is not None:
+                if (run_time := summary.run_time) is not None:
                     statsd.histogram(
                         DataDogMetrics.TASK_RUNTIME_TIME.value, run_time, tags=tags
                     )
