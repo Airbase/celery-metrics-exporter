@@ -19,15 +19,15 @@ def run(broker):
     store = InMemoryStore(max_size=100000)
 
     logging.info("Initialize receiver")
-    event_receiver = CeleryEventReceiver(broker=broker, store=store)
+    event_receiver = CeleryEventReceiver(broker=broker)
     event_receiver.start()
 
     # start all the exporters in different threads
     logging.info("Initialize datadog exporter")
     dd_exporter = DataDogExporter(store=store)
+    event_receiver.attach(dd_exporter)
     dd_exporter.start()
 
-    # data flow: event_receiver -> store -> dd_exporter
     event_receiver.join()
     dd_exporter.join()
 

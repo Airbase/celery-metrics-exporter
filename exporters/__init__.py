@@ -1,3 +1,4 @@
+from exporters.base import Exporter
 from exporters.dd import DataDogExporter
 
-__all__ = ["DataDogExporter"]
+__all__ = ["Exporter", "DataDogExporter"]

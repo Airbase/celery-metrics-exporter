@@ -1,28 +1,36 @@
 import logging
 from threading import Thread
 from time import sleep
+from typing import Union
 
 from celery import Celery
-from celery.states import READY_STATES
+from celery.events.state import Task, Worker
 
-from store import TaskStore
+from exporters import Exporter
 from utils import is_event_type_task
 
 logger = logging.getLogger(__name__)
 
 
 class CeleryEventReceiver(Thread):
-    def __init__(self, broker: str, store: TaskStore = None):
+    def __init__(self, broker: str):
         Thread.__init__(self)
         self.daemon = True
         self.broker = broker
-        self.store = store
         self.celery_app = Celery(
             broker=self.broker,
         )
+        self.exporters: list[Exporter] = []
         self.state = self.celery_app.events.State()
 
-    def process_event(self, event):
+    def attach(self, exporter):
+        self.exporters.append(exporter)
+
+    def notify(self, event: Union[Task, Worker]):
+        for exporter in self.exporters:
+            exporter.process_event(event)
+
+    def notify_event(self, event):
         event_type: str = event.get("type")
         if not is_event_type_task(event_type):
             return
@@ -32,17 +40,14 @@ class CeleryEventReceiver(Thread):
         logger.debug(
             f"Receiver event: {event.uuid} {event.name}, {event.state} {event.timestamp} with data: {event}"
         )
-        self.store.add_event(event.uuid, event.state, event)
-        if event.state in READY_STATES:
-            logger.debug(f"task: {event.uuid} ended with state: {event.state}")
-            self.store.add_processable_task(event.uuid)
+        self.notify(event)
 
     def run(self) -> None:
         with self.celery_app.connection() as connection:
             while True:
                 try:
                     receiver = self.celery_app.events.Receiver(
-                        connection, handlers={"*": self.process_event}
+                        connection, handlers={"*": self.notify_event}
                     )
                     receiver.capture(limit=None, timeout=None)
                 except Exception as ex:

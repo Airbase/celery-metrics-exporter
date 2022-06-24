@@ -2,9 +2,13 @@ import logging
 from enum import Enum
 from threading import Thread
 from time import sleep
+from typing import Union
 
-from celery.states import FAILURE, PENDING, STARTED, SUCCESS
+from celery.events.state import Task, Worker
+from celery.states import FAILURE, PENDING, READY_STATES, STARTED, SUCCESS
 from datadog import initialize, statsd
+
+from exporters import Exporter
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +53,7 @@ class DataDogSummary:  # maybe this can be generic
             return None
 
 
-class DataDogExporter(Thread):
+class DataDogExporter(Exporter, Thread):
     def __init__(self, config_option=None, store=None):
         Thread.__init__(self)
         self.daemon = True
@@ -71,6 +75,12 @@ class DataDogExporter(Thread):
             return [f"{key}:{value}" for key, value in tags_dict.items() if value]
         except KeyError:
             logger.exception(f"Pending Event missing in {events}")
+
+    def process_event(self, event: Union[Task, Worker]):
+        self.store.add_event(event.uuid, event.state, event)
+        if event.state in READY_STATES:
+            logger.debug(f"task: {event.uuid} ended with state: {event.state}")
+            self.store.add_processable_task(event.uuid)
 
     def run(self) -> None:
         logger.info("Starting Datadog exporter")
