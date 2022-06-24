@@ -1,5 +1,4 @@
 import logging
-from threading import Thread
 from time import sleep
 from typing import Union
 
@@ -12,10 +11,8 @@ from utils import is_event_type_task
 logger = logging.getLogger(__name__)
 
 
-class CeleryEventReceiver(Thread):
+class CeleryEventReceiver:
     def __init__(self, broker: str):
-        Thread.__init__(self)
-        self.daemon = True
         self.broker = broker
         self.celery_app = Celery(
             broker=self.broker,

@@ -15,21 +15,15 @@ def run(broker):
         format="[%(levelname)s] %(message)s", level=os.environ.get("LOG_LEVEL")
     )
 
-    logging.info("Initialize store")
-    store = InMemoryStore(max_size=100000)
+    # start all the exporters in different threads
+    logging.info("Initialize datadog exporter")
+    dd_exporter = DataDogExporter(store=InMemoryStore(max_size=100000))
+    dd_exporter.start()
 
     logging.info("Initialize receiver")
     event_receiver = CeleryEventReceiver(broker=broker)
-    event_receiver.start()
-
-    # start all the exporters in different threads
-    logging.info("Initialize datadog exporter")
-    dd_exporter = DataDogExporter(store=store)
     event_receiver.attach(dd_exporter)
-    dd_exporter.start()
-
-    event_receiver.join()
-    dd_exporter.join()
+    event_receiver.run()
 
 
 if __name__ == "__main__":
