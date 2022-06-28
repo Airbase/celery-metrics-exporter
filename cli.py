@@ -1,19 +1,38 @@
 import logging
 import os
+import sys
 
 import click
+import daiquiri
+from pythonjsonlogger.jsonlogger import JsonFormatter
 
 from exporters import DataDogExporter
 from receiver import CeleryEventReceiver
 from store import InMemoryStore
 
 
+def setup_logging():
+    prod_log_format = (
+        "%(asctime)s [%(process)d] %(levelname)-8.8s %(name)s: %(message)s"
+    )
+    is_production_env = os.environ.get("PROD", "False").lower() == "true"
+    output_formatter = (
+        JsonFormatter(prod_log_format)
+        if is_production_env
+        else daiquiri.formatter.ColorFormatter()
+    )
+    daiquiri.setup(
+        level=os.environ.get("LOG_LEVEL", "INFO"),
+        outputs=[
+            daiquiri.output.Stream(sys.stdout, formatter=output_formatter),
+        ],
+    )
+
+
 @click.command()
 @click.option("--broker", default="redis://localhost:6379/1", help="celery broker uri")
 def run(broker):
-    logging.basicConfig(
-        format="[%(levelname)s] %(message)s", level=os.environ.get("LOG_LEVEL")
-    )
+    setup_logging()
 
     # start all the exporters in different threads
     logging.info("Initialize datadog exporter")

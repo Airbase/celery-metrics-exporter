@@ -1,16 +1,16 @@
-import logging
 from enum import Enum
 from threading import Thread
 from time import sleep
 from typing import Union
 
+import daiquiri
 from celery.events.state import Task, Worker
 from celery.states import FAILURE, PENDING, READY_STATES, STARTED, SUCCESS
 from datadog import initialize, statsd
 
 from exporters import Exporter
 
-logger = logging.getLogger(__name__)
+logger = daiquiri.getLogger(__name__)
 
 
 class DataDogMetrics(Enum):

@@ -1,11 +1,10 @@
-import logging
 from abc import ABC, abstractmethod
 from queue import Queue
 
+import daiquiri
 from kombu.utils.functional import LRUCache
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+logger = daiquiri.getLogger(__name__)
 
 
 class TaskStore(ABC):
@@ -62,7 +61,6 @@ class InMemoryStore(TaskStore):
 
     def add_event(self, task_id, state, event):
         event_dict = self.serialize(event)
-        logger.debug(f"Serialized data: {event_dict}")
         try:
             self.event_store[task_id][state] = event_dict
         except KeyError:

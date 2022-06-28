@@ -1,14 +1,14 @@
-import logging
 from time import sleep
 from typing import Union
 
+import daiquiri
 from celery import Celery
 from celery.events.state import Task, Worker
 
 from exporters import Exporter
 from utils import is_event_type_task
 
-logger = logging.getLogger(__name__)
+logger = daiquiri.getLogger(__name__)
 
 
 class CeleryEventReceiver:
