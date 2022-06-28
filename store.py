@@ -1,7 +1,6 @@
 import logging
 from abc import ABC, abstractmethod
 from queue import Queue
-from threading import Lock
 
 from kombu.utils.functional import LRUCache
 
@@ -48,7 +47,6 @@ class InMemoryStore(TaskStore):
     def __init__(self, max_size):
         self.event_store = LRUCache(max_size)
         self.processing_queue = Queue()
-        self.mutex = Lock()
 
     def is_empty(self):
         return self.processing_queue.empty()
@@ -60,8 +58,7 @@ class InMemoryStore(TaskStore):
         return self.event_store.get(task_id)
 
     def pop_task(self, task_id):
-        with self.mutex:
-            self.event_store.data.pop(task_id)
+        self.event_store.data.pop(task_id)
 
     def add_event(self, task_id, state, event):
         event_dict = self.serialize(event)
