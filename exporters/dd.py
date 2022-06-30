@@ -106,6 +106,6 @@ class DataDogExporter(Exporter, Thread):
                 if FAILURE in events:
                     statsd.increment(DataDogMetrics.TOTAL_FAILED.value, tags=tags)
                 self.store.pop_task(task_id)
-            except Exception as ex:
-                logger.exception(f"datadog exporter exception {ex}")
+            except Exception:
+                logger.exception("datadog exporter exception")
                 sleep(10)

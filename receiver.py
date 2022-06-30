@@ -47,6 +47,6 @@ class CeleryEventReceiver:
                         connection, handlers={"*": self.notify_event}
                     )
                     receiver.capture(limit=None, timeout=None)
-                except Exception as ex:
-                    logger.exception(f"Generic Exception {ex}")
+                except Exception:
+                    logger.exception("Exception at CeleryEventReceiver")
                     sleep(10)
