@@ -31,8 +31,6 @@ venv
 .hypothesis
 .mypy_cache/
 .pytest_cache
-.test_durations
-.testmondata
 coverage.xml
 htmlcov
 
@@ -40,16 +38,7 @@ htmlcov
 *.dump
 *.sqlite3
 
-# docs
-docs/_build/
-# wrangler generated code
-docs/workers-site/
-docs/wrangler.toml
-
 # Misc
 *.DS_Store
 *.log
-_trial_temp/
-# Xero private key for local development
-.xero.pem
-ml_artifact/
+
