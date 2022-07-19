@@ -26,10 +26,16 @@ class DataDogSummary:  # maybe this can be generic
 
     @property
     def wait_time(self):
-        """
-        Returns wait time in seconds
+        """Returns wait time of a task in seconds.
 
-        :return: int
+        Note:
+        -----
+            observation task started from celery-beat don't have pending or task-sent event
+
+        Returns
+        --------
+        int
+            Wait Time in seconds
         """
         try:
             client_sent_time = self.events[PENDING]["timestamp"]
@@ -41,10 +47,12 @@ class DataDogSummary:  # maybe this can be generic
 
     @property
     def run_time(self):
-        """
-        Returns runtime in seconds
+        """Returns execution of a task in seconds.
 
-        :return: int
+        Returns
+        --------
+        int
+            Run Time in seconds
         """
         try:
             return self.events[SUCCESS]["runtime"]

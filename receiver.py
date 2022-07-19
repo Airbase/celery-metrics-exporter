@@ -23,13 +23,15 @@ class CeleryEventReceiver:
     def attach(self, exporter):
         self.exporters.append(exporter)
 
-    def notify(self, event: Union[Task, Worker]):
+    def _notify_exporters(self, event: Union[Task, Worker]):
         for exporter in self.exporters:
             exporter.process_event(event)
 
-    def notify_event(self, event):
+    def notify(self, event):
         event_type: str = event.get("type")
         if not is_event_type_task(event_type):
+            # Since we are only exporting metrics related to celery task
+            # worker event can be filtered out
             return
 
         event_details, event_type = self.state.event(event)
@@ -37,16 +39,16 @@ class CeleryEventReceiver:
         logger.debug(
             f"Receiver event: {event.uuid} {event.name}, {event.state} {event.timestamp} with data: {event}"
         )
-        self.notify(event)
+        self._notify_exporters(event)
 
     def run(self) -> None:
         with self.celery_app.connection() as connection:
             while True:
                 try:
                     receiver = self.celery_app.events.Receiver(
-                        connection, handlers={"*": self.notify_event}
+                        connection, handlers={"*": self.notify}
                     )
-                    receiver.capture(limit=None, timeout=None)
+                    receiver.capture(limit=None, timeout=120)
                 except Exception:
                     logger.exception("Exception at CeleryEventReceiver")
                     sleep(10)
