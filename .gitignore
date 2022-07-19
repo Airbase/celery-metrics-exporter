@@ -1,0 +1,43 @@
+# Python
+*.egg-info
+*.pyc
+.python-version
+build
+
+# Notebooks
+*.ipynb
+*.ipynb_checkpoints
+
+# Celery
+celerybeat.pid
+celerybeat-schedule*
+
+# Django
+staticfiles
+
+# Environment
+.env*
+.envs/
+.venv
+venv
+
+# IDEs
+*.swp
+.idea
+.vscode
+
+# Testing and lints
+.coverage*
+.hypothesis
+.mypy_cache/
+.pytest_cache
+coverage.xml
+htmlcov
+
+# DB dumps
+*.dump
+*.sqlite3
+
+# Misc
+*.DS_Store
+*.log
