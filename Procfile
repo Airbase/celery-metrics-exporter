@@ -1,1 +1,1 @@
-worker: python cli.py --broker=$REDIS_BROKER
+worker: python cli.py --broker=$REDIS_URL
