@@ -61,9 +61,7 @@ class PostgresExporter(Exporter, Thread):
         if status in (PENDING, RECEIVED):
             model_dict = {
                 "name": event_dict["name"],
-                "args": json.loads(
-                    event_dict["args"].replace("(", "[").replace(")", "]")
-                ),
+                "args": list(eval(event_dict["args"])),
                 "kwargs": json.loads(event_dict["kwargs"]),
                 "worker": event_dict["hostname"],
                 **model_dict,
