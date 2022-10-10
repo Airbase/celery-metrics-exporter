@@ -4,6 +4,8 @@ from queue import Queue
 import daiquiri
 from kombu.utils.functional import LRUCache
 
+from utils import serialize_event
+
 logger = daiquiri.getLogger(__name__)
 
 
@@ -35,11 +37,7 @@ class TaskStore(ABC):
         pass
 
     def serialize(self, event):
-        return {
-            field: getattr(event, field)
-            for field in self.event_fields
-            if hasattr(event, field)
-        }
+        return serialize_event(event, self.event_fields)
 
 
 class InMemoryStore(TaskStore):
