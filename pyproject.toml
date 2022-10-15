@@ -5,7 +5,7 @@ description = "Celery metrics exporter for Datadog and Postgres"
 authors = ["Airbase Inc <developers@airbase.io>"]
 
 [tool.poetry.dependencies]
-python = "3.10.*"
+python = "3.9.*"
 celery = "^5.2"
 datadog = "^0.44"
 kombu = "^5.2"
@@ -14,6 +14,10 @@ amqp = "^5.1"
 click = "^8.1"
 requests = "^2.28"
 daiquiri = "^3.1.0"
+SQLAlchemy = "^1.4.41"
+alembic = "^1.8.1"
+psycopg2 = "^2.9.4"
+scalene = "^1.5.13"
 
 [tool.poetry.dev-dependencies]
 black = "22.3.0"
