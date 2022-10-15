@@ -1,4 +1,3 @@
-import json
 from datetime import datetime
 from queue import Queue
 from threading import Thread
@@ -62,7 +61,7 @@ class PostgresExporter(Exporter, Thread):
             model_dict = {
                 "name": event_dict["name"],
                 "args": list(eval(event_dict["args"])),
-                "kwargs": json.loads(event_dict["kwargs"]),
+                "kwargs": eval(event_dict["kwargs"]),
                 "worker": event_dict["hostname"],
                 **model_dict,
             }
