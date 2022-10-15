@@ -48,7 +48,20 @@ class PostgresExporter(Exporter, Thread):
         )
 
     @staticmethod
-    def to_model_dict(event_dict):
+    def safe_get_args(event_dict):
+        try:
+            return list(eval(event_dict["args"]))
+        except Exception:
+            return []
+
+    @staticmethod
+    def safe_get_kwargs(event_dict):
+        try:
+            return eval(event_dict["kwargs"])
+        except Exception:
+            return {}
+
+    def to_model_dict(self, event_dict):
         status = event_dict["status"]
         model_dict = {
             "task_id": event_dict["uuid"],
@@ -60,8 +73,8 @@ class PostgresExporter(Exporter, Thread):
         if status in (PENDING, RECEIVED):
             model_dict = {
                 "name": event_dict["name"],
-                "args": list(eval(event_dict["args"])),
-                "kwargs": eval(event_dict["kwargs"]),
+                "args": self.safe_get_args(event_dict),
+                "kwargs": self.safe_get_kwargs(event_dict),
                 "worker": event_dict["hostname"],
                 **model_dict,
             }
