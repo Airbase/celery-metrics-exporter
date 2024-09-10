@@ -1,7 +1,6 @@
 from enum import Enum
 from threading import Thread
 from time import sleep
-from typing import Union
 
 import daiquiri
 from celery.events.state import Task, Worker
@@ -21,7 +20,7 @@ class DataDogMetrics(Enum):
 
 
 class DataDogSummary:  # maybe this can be generic
-    def __init__(self, events):
+    def __init__(self, events) -> None:
         self.events = events
 
     @property
@@ -29,13 +28,14 @@ class DataDogSummary:  # maybe this can be generic
         """Returns wait time of a task in seconds.
 
         Note:
-        -----
+        ----
             observation task started from celery-beat don't have pending or task-sent event
 
-        Returns
-        --------
+        Returns:
+        -------
         int
             Wait Time in seconds
+
         """
         try:
             client_sent_time = self.events[PENDING]["timestamp"]
@@ -50,9 +50,10 @@ class DataDogSummary:  # maybe this can be generic
         """Returns execution of a task in seconds.
 
         Returns
-        --------
+        -------
         int
             Run Time in seconds
+
         """
         try:
             return self.events[SUCCESS]["runtime"]
@@ -62,7 +63,7 @@ class DataDogSummary:  # maybe this can be generic
 
 
 class DataDogExporter(Exporter, Thread):
-    def __init__(self, config_option=None, store=None):
+    def __init__(self, config_option=None, store=None) -> None:
         Thread.__init__(self)
         self.daemon = True
         self.store = store
@@ -84,7 +85,7 @@ class DataDogExporter(Exporter, Thread):
         except KeyError:
             logger.exception(f"Pending Event missing in {events}")
 
-    def process_event(self, event: Union[Task, Worker]):
+    def process_event(self, event: Task | Worker) -> None:
         self.store.add_event(event.uuid, event.state, event)
         if event.state in READY_STATES:
             logger.debug(f"task: {event.uuid} ended with state: {event.state}")
@@ -103,11 +104,15 @@ class DataDogExporter(Exporter, Thread):
                 summary = DataDogSummary(events)
                 if (wait_time := summary.wait_time) is not None:
                     statsd.histogram(
-                        DataDogMetrics.TASK_WAIT_TIME.value, wait_time, tags=tags
+                        DataDogMetrics.TASK_WAIT_TIME.value,
+                        wait_time,
+                        tags=tags,
                     )
                 if (run_time := summary.run_time) is not None:
                     statsd.histogram(
-                        DataDogMetrics.TASK_RUNTIME_TIME.value, run_time, tags=tags
+                        DataDogMetrics.TASK_RUNTIME_TIME.value,
+                        run_time,
+                        tags=tags,
                     )
                 if SUCCESS in events:
                     statsd.increment(DataDogMetrics.TOTAL_SUCCESS.value, tags=tags)

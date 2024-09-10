@@ -11,7 +11,7 @@ from receiver import CeleryEventReceiver
 from store import InMemoryStore
 
 
-def setup_logging():
+def setup_logging() -> None:
     prod_log_format = (
         "%(asctime)s [%(process)d] %(levelname)-8.8s %(name)s: %(message)s"
     )
@@ -31,7 +31,7 @@ def setup_logging():
 
 @click.command()
 @click.option("--broker", default="redis://localhost:6379/1", help="celery broker uri")
-def run(broker):
+def run(broker) -> None:
     setup_logging()
 
     # start all the exporters in different threads
